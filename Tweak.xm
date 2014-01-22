@@ -1,33 +1,62 @@
-// #import <SpringBoard/SBSearchView.h>
-#import <SpringBoard/SBSearchController.h>
 
-// static UITableView *sbTableView;
-// // static SBSearchController *sbSearchController;
-
-// %hook SBSearchView
-
-
-// - (void)addTableView
-// {
-//     // %log;
-//     %orig;
-//     sbTableView = [self tableView];
-//     // sbSearchController = (SBSearchController *)[sbTableView delegate];
-//     // NSLog(@"addTableView: %@", sbTableView);
-//     // NSLog(@"addTableViewDelegate: %@", sbSearchController);
-// }
-
-// %end
+#import <iOS6/SpringBoard/SBSearchController.h>
+#import <iOS7/SpringBoard/SBSearchViewController.h>
+#import <iOS7/SpringBoard/SBSearchHeader.h>
+#import <iOS7/SpringBoard/SBSearchField.h>
+#import <substrate.h>
 
 
+%group iOS6
 %hook SBSearchController
 
 - (void)searchBarSearchButtonClicked:(id)arg1
 {
     %orig;
-    //- (void)tableView:(id)arg1 didSelectRowAtIndexPath:(id)arg2;
-    NSIndexPath *firstResult = [NSIndexPath indexPathForRow:0 inSection:0];
-    [self tableView:nil didSelectRowAtIndexPath:firstResult];
+    [self tableView:nil didSelectRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
 }
 
 %end
+%end
+
+
+
+%group iOS7
+
+static bool alreadyRan = NO;
+
+%hook SBSearchViewController
+
+- (void)searchGesture:(id)arg1 completedShowing:(BOOL)arg2 {
+    alreadyRan = NO;
+    %orig;
+}
+
+- (id)init {
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(textFieldDidChange:)
+                                                 name:UITextFieldTextDidEndEditingNotification
+                                              object:nil];
+    return %orig;
+}
+
+%new
+- (void)textFieldDidChange:(NSNotification *)notif {
+    if (!alreadyRan) {
+        [self tableView:nil didSelectRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
+        alreadyRan = YES;
+    }
+}
+
+%end
+
+
+%end
+
+%ctor {
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0) {
+        %init(iOS7);
+    } else {
+        %init(iOS6);
+    }
+}
+

@@ -1,7 +1,7 @@
 Package: com.mattcmultimedia.openonsearch
 Name: OpenOnSearch
 Depends: mobilesubstrate
-Version: 1.0.0
+Version: 1.1.0
 Architecture: iphoneos-arm
 Description: open spotlight result on search
 Maintainer: MattCMultimedia
