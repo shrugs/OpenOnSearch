@@ -1,6 +1,8 @@
 export TARGET=iphone:clang
 export THEOS_DEVICE_IP=192.168.1.7
 
+ARCHS = armv7 armv7s arm64
+
 include theos/makefiles/common.mk
 
 TWEAK_NAME = OpenOnSearch

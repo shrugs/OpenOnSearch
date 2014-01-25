@@ -12,7 +12,8 @@
 - (void)searchBarSearchButtonClicked:(id)arg1
 {
     %orig;
-    [self tableView:nil didSelectRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
+    UITableView * table = MSHookIvar<UITableView *>(self, "_tableView");
+    [self tableView:table didSelectRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
 }
 
 %end
@@ -22,34 +23,15 @@
 
 %group iOS7
 
-static bool alreadyRan = NO;
-
 %hook SBSearchViewController
-
-- (void)searchGesture:(id)arg1 completedShowing:(BOOL)arg2 {
-    alreadyRan = NO;
+- (void)_searchFieldReturnPressed
+{
     %orig;
-}
-
-- (id)init {
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(textFieldDidChange:)
-                                                 name:UITextFieldTextDidEndEditingNotification
-                                              object:nil];
-    return %orig;
-}
-
-%new
-- (void)textFieldDidChange:(NSNotification *)notif {
-    if (!alreadyRan) {
-        [self tableView:nil didSelectRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
-        alreadyRan = YES;
-    }
+    UITableView * table = MSHookIvar<UITableView *>(self, "_tableView");
+    [self tableView:table didSelectRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
 }
 
 %end
-
-
 %end
 
 %ctor {
